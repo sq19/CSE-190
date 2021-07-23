@@ -6,8 +6,8 @@ from collections import namedtuple
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 
-from tf2_module import build_generator, build_discriminator, abs_criterion, mae_criterion
-from tf2_utils import get_now_datetime, ImagePool, to_binary, load_npy_data, save_midis
+from module import build_generator, build_discriminator, abs_criterion, mae_criterion
+from utils import get_now_datetime, ImagePool, to_binary, load_npy_data, save_midis
 
 
 class CycleGAN(object):

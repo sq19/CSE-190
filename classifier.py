@@ -6,8 +6,8 @@ from glob import glob
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 
-from tf2_module import build_generator, build_discriminator_classifier, softmax_criterion
-from tf2_utils import get_now_datetime, save_midis
+from module import build_generator, build_discriminator_classifier, softmax_criterion
+from utils import get_now_datetime, save_midis
 
 
 class Classifier(object):
