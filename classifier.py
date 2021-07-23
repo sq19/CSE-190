@@ -85,8 +85,8 @@ class Classifier(object):
 
         # create training list (origin data with corresponding label)
         # Label for A is (1, 0), for B is (0, 1)
-        dataA = glob('./datasets/{}/train/*.*'.format(self.dataset_A_dir))
-        dataB = glob('./datasets/{}/train/*.*'.format(self.dataset_B_dir))
+        dataA = glob('./MIDI/{}/train/phrase_train/*.*'.format(self.dataset_A_dir))
+        dataB = glob('./MIDI/{}/train/phrase_train/*.*'.format(self.dataset_B_dir))
         labelA = [(1.0, 0.0) for _ in range(len(dataA))]
         labelB = [(0.0, 1.0) for _ in range(len(dataB))]
         data_origin = dataA + dataB
@@ -95,8 +95,8 @@ class Classifier(object):
         print('Successfully create training list!')
 
         # create test list (origin data with corresponding label)
-        dataA = glob('./datasets/{}/test/*.*'.format(self.dataset_A_dir))
-        dataB = glob('./datasets/{}/test/*.*'.format(self.dataset_B_dir))
+        dataA = glob('./MIDI/{}/test/phrase_test/*.*'.format(self.dataset_A_dir))
+        dataB = glob('./MIDI/{}/test/phrase_test/*.*'.format(self.dataset_B_dir))
         labelA = [(1.0, 0.0) for _ in range(len(dataA))]
         labelB = [(0.0, 1.0) for _ in range(len(dataB))]
         data_origin = dataA + dataB
@@ -105,7 +105,9 @@ class Classifier(object):
         print('Successfully create testing list!')
 
         data_test = [np.load(pair[0]) * 2. - 1. for pair in testing_list]
-        data_test = np.array(data_test).astype(np.float32)
+        data_test = np.array(data_test, dtype=object)
+        data_test = data_test.astype(np.float32)
+
         gaussian_noise = np.random.normal(0,
                                           self.sigma_c,
                                           [data_test.shape[0],
@@ -323,41 +325,3 @@ class Classifier(object):
         accuracy_transfer = count_transfer * 1.0 / len(sample_files)
         accuracy_cycle = count_cycle * 1.0 / len(sample_files)
         print('Accuracy of this classifier on test datasets is :', accuracy_origin, accuracy_transfer, accuracy_cycle)
-
-    def test_famous(self, args):
-
-        song_origin = np.load('./datasets/famous_songs/C2J/merged_npy/Scenes from Childhood (Schumann).npy')
-        song_transfer = np.load('./datasets/famous_songs/C2J/transfer/Scenes from Childhood (Schumann).npy')
-        print(song_origin.shape, song_transfer.shape)
-
-        if self.checkpoint.restore(self.checkpoint_manager.latest_checkpoint):
-            print(" [*] Load checkpoint succeeded!")
-        else:
-            print(" [!] Load checkpoint failed...")
-
-        sum_origin_A = 0
-        sum_origin_B = 0
-        sum_transfer_A = 0
-        sum_transfer_B = 0
-
-        for idx in range(song_transfer.shape[0]):
-
-            phrase_origin = song_origin[idx]
-            phrase_origin = phrase_origin.reshape(1, phrase_origin.shape[0], phrase_origin.shape[1], 1)
-            origin_softmax = tf.nn.softmax(self.classifier(phrase_origin * 2. - 1.,
-                                                           training=False))
-
-            phrase_transfer = song_transfer[idx]
-            phrase_transfer = phrase_transfer.reshape(1, phrase_transfer.shape[0], phrase_transfer.shape[1], 1)
-            transfer_softmax = tf.nn.softmax(self.classifier(phrase_transfer * 2. - 1.,
-                                                             training=False))
-
-            sum_origin_A += origin_softmax[0][0]
-            sum_origin_B += origin_softmax[0][1]
-            sum_transfer_A += transfer_softmax[0][0]
-            sum_transfer_B += transfer_softmax[0][1]
-
-        print("origin, source:", sum_origin_A / song_transfer.shape[0],
-              "target:", sum_origin_B / song_transfer.shape[0])
-        print("transfer, source:", sum_transfer_A / song_transfer.shape[0],
-              "target:", sum_transfer_B / song_transfer.shape[0])

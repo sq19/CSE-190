@@ -42,9 +42,9 @@ class CycleGAN(object):
                                         'is_training')
         self.options = OPTIONS._make((args.batch_size,
                                       args.time_step,
-                                      args.pitch_range,
                                       args.input_nc,
                                       args.output_nc,
+                                      args.pitch_range,
                                       args.ngf,
                                       args.ndf,
                                       args.phase == 'train'))
@@ -139,13 +139,11 @@ class CycleGAN(object):
     def train(self, args):
 
         # Data from domain A and B, and mixed dataset for partial and full models.
-        dataA = glob('./datasets/{}/train/*.*'.format(self.dataset_A_dir))
-        dataB = glob('./datasets/{}/train/*.*'.format(self.dataset_B_dir))
+        dataA = glob('./MIDI/{}/train/phrase_train/*.*'.format(self.dataset_A_dir))
+        dataB = glob('./MIDI/{}/train/phrase_train/*.*'.format(self.dataset_B_dir))
         data_mixed = None
-        if self.model == 'partial':
-            data_mixed = dataA + dataB
         if self.model == 'full':
-            data_mixed = glob('./datasets/JCP_mixed/*.*')
+            data_mixed = dataA + dataB
 
         if args.continue_train:
             if self.checkpoint.restore(self.checkpoint_manager.latest_checkpoint):
@@ -415,9 +413,9 @@ class CycleGAN(object):
     def test(self, args):
 
         if args.which_direction == 'AtoB':
-            sample_files = glob('./datasets/{}/test/*.*'.format(self.dataset_A_dir))
+            sample_files = glob('./MIDI/{}/test/phrase_test/*.*'.format(self.dataset_A_dir))
         elif args.which_direction == 'BtoA':
-            sample_files = glob('./datasets/{}/test/*.*'.format(self.dataset_B_dir))
+            sample_files = glob('./MIDI/{}/test/phrase_test/*.*'.format(self.dataset_B_dir))
         else:
             raise Exception('--which_direction must be AtoB or BtoA')
         sample_files.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split('_')[-1]))
@@ -488,22 +486,3 @@ class CycleGAN(object):
             np.save(os.path.join(npy_path_origin, '{}_origin.npy'.format(idx + 1)), origin)
             np.save(os.path.join(npy_path_transfer, '{}_transfer.npy'.format(idx + 1)), transfer)
             np.save(os.path.join(npy_path_cycle, '{}_cycle.npy'.format(idx + 1)), cycle)
-
-    def test_famous(self, args):
-
-        song = np.load('./datasets/famous_songs/P2C/merged_npy/YMCA.npy')
-
-        if self.checkpoint.restore(self.checkpoint_manager.latest_checkpoint):
-            print(" [*] Load checkpoint succeeded!")
-        else:
-            print(" [!] Load checkpoint failed...")
-
-        if args.which_direction == 'AtoB':
-            transfer = self.generator_A2B(song,
-                                          training=False)
-        else:
-            transfer = self.generator_B2A(song,
-                                          training=False)
-
-        save_midis(transfer, './datasets/famous_songs/P2C/transfer/YMCA.mid', 127)
-        np.save('./datasets/famous_songs/P2C/transfer/YMCA.npy', transfer)
