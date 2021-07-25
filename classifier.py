@@ -39,9 +39,9 @@ class Classifier(object):
                                         'is_training')
         self.options = OPTIONS._make((args.batch_size,
                                       args.time_step,
-                                      args.pitch_range,
                                       args.input_nc,
                                       args.output_nc,
+                                      args.pitch_range,
                                       args.ngf,
                                       args.ndf,
                                       args.phase == 'train'))
@@ -85,8 +85,8 @@ class Classifier(object):
 
         # create training list (origin data with corresponding label)
         # Label for A is (1, 0), for B is (0, 1)
-        dataA = glob('./MIDI/{}/train/phrase_train/*.*'.format(self.dataset_A_dir))
-        dataB = glob('./MIDI/{}/train/phrase_train/*.*'.format(self.dataset_B_dir))
+        dataA = glob('./Dataset/{}/train/*.*'.format(self.dataset_A_dir))
+        dataB = glob('./Dataset/{}/train/*.*'.format(self.dataset_B_dir))
         labelA = [(1.0, 0.0) for _ in range(len(dataA))]
         labelB = [(0.0, 1.0) for _ in range(len(dataB))]
         data_origin = dataA + dataB
@@ -95,8 +95,8 @@ class Classifier(object):
         print('Successfully create training list!')
 
         # create test list (origin data with corresponding label)
-        dataA = glob('./MIDI/{}/test/phrase_test/*.*'.format(self.dataset_A_dir))
-        dataB = glob('./MIDI/{}/test/phrase_test/*.*'.format(self.dataset_B_dir))
+        dataA = glob('./Dataset/{}/test/*.*'.format(self.dataset_A_dir))
+        dataB = glob('./Dataset/{}/test/*.*'.format(self.dataset_B_dir))
         labelA = [(1.0, 0.0) for _ in range(len(dataA))]
         labelB = [(0.0, 1.0) for _ in range(len(dataB))]
         data_origin = dataA + dataB
@@ -197,7 +197,7 @@ class Classifier(object):
                                                                                     args.which_direction))
         sample_files_origin.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split('_')[0]))
 
-        # load the origin samples in npy format and sorted in ascending order
+        # load the transfer samples in npy format and sorted in ascending order
         sample_files_transfer = glob('./test/{}2{}_{}_{}_{}/{}/npy/transfer/*.*'.format(self.dataset_A_dir,
                                                                                         self.dataset_B_dir,
                                                                                         self.model,
@@ -206,7 +206,7 @@ class Classifier(object):
                                                                                         args.which_direction))
         sample_files_transfer.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split('_')[0]))
 
-        # load the origin samples in npy format and sorted in ascending order
+        # load the cycle samples in npy format and sorted in ascending order
         sample_files_cycle = glob('./test/{}2{}_{}_{}_{}/{}/npy/cycle/*.*'.format(self.dataset_A_dir,
                                                                                   self.dataset_B_dir,
                                                                                   self.model,
