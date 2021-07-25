@@ -142,7 +142,7 @@ class CycleGAN(object):
         dataA = glob('./MIDI/{}/train/phrase_train/*.*'.format(self.dataset_A_dir))
         dataB = glob('./MIDI/{}/train/phrase_train/*.*'.format(self.dataset_B_dir))
         data_mixed = None
-        if self.model == 'full':
+        if self.model == 'partial':
             data_mixed = dataA + dataB
 
         if args.continue_train:
